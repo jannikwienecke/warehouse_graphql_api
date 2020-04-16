@@ -1,0 +1,1 @@
+$ python warehouseGraphql/manage.py graphql_schema --schema warehouseGraphql.schema.schema --out schema.json
