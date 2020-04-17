@@ -32,6 +32,7 @@ class Query(graphene.ObjectType):
     @login_required
     def resolve_products(self, info, **kwargs):
 
+        print("KWAQGAS ===", kwargs)
         queryset = Product.objects.all()
 
         if kwargs:
@@ -119,7 +120,24 @@ class UpdateProduct(graphene.Mutation):
         return product
 
 
+class DeleteProduct(graphene.Mutation):
+    id = graphene.Int()
+
+    class Arguments:
+        id =graphene.Int()
+
+    def mutate(self, info, id=None, **args):
+
+        try:
+            Product.objects.get(id=id).delete()
+        except:
+            raise GraphQLError(f"'Produkt' mit ID {id} Nicht vorhanden")
+
+        return {'data': {'msg': 'Erfolgreich gelöscht'}}
+
+
 
 class Mutation(graphene.ObjectType):
     create_product = CreateProduct.Field()
     update_product = UpdateProduct.Field()
+    delete_product = DeleteProduct.Field()

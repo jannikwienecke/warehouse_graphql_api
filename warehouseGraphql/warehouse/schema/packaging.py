@@ -4,6 +4,7 @@ from graphene_django import DjangoObjectType
 from graphql import GraphQLError
 
 from django.db.models import Q
+from ..graphql_jwt.decorators import login_required
 
 from ..models import Packaging
 from ..utils import Filter
@@ -11,7 +12,6 @@ from ..utils import Filter
 class PackagingType(DjangoObjectType):
     class Meta:
         model = Packaging
-
 
 class Query(graphene.ObjectType):
     packagings = graphene.List(
@@ -47,11 +47,12 @@ class CreatePackaging(graphene.Mutation):
         width = graphene.Int()
         length = graphene.Int()
 
-
+    @login_required
     def mutate(self, info, name, width, length):
 
         user = info.context.user or Non
 
+        
         package = Packaging(name=name, width=width, length=length, created_by=user)
         package.save()
 
@@ -91,7 +92,24 @@ class UpdatePackaging(graphene.Mutation):
 
         return packaging
 
+class DeletePackaging(graphene.Mutation):
+    id = graphene.Int()
+
+    class Arguments:
+        id =graphene.Int()
+
+    def mutate(self, info, id=None, **args):
+
+        try:
+            Packaging.objects.get(id=id).delete()
+        except:
+            raise GraphQLError(f"'Packaging' mit ID {id} Nicht vorhanden")
+
+        return {'data': {'msg': 'Erfolgreich gelöscht'}}
+
+
 
 class Mutation(graphene.ObjectType):
     create_packaging = CreatePackaging.Field()
     update_packaging = UpdatePackaging.Field()
+    delete_packaging = DeletePackaging.Field()

@@ -21,7 +21,7 @@ class Filter:
     def run_filter(self):
         for filter_key, filter_value in self.filters.items():
             
-            if not filter_value:
+            if not filter_value and not filter_value == False:
                 continue
 
             if self.filter_exclude and filter_key in self.filter_exclude:
