@@ -133,7 +133,7 @@ class DeleteProduct(graphene.Mutation):
         except:
             raise GraphQLError(f"'Produkt' mit ID {id} Nicht vorhanden")
 
-        return {'data': {'msg': 'Erfolgreich gelöscht'}}
+        return id
 
 
 

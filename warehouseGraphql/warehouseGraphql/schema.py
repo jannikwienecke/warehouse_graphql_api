@@ -2,16 +2,19 @@ import graphene
 import graphql_jwt
 
 import users.schema
-from warehouse.schema import product, packaging
+from warehouse.schema import product, packaging, employee
 
+# class Query(product.Query,  employee.Query, users.schema.Query, graphene.ObjectType):
+#     pass
 
-class Query(product.Query, packaging.Query, users.schema.Query, graphene.ObjectType):
+class Query(product.Query, packaging.Query, employee.Query, users.schema.Query, graphene.ObjectType):
     pass
 
 class Mutation(
     users.schema.Mutation,
     product.Mutation,
     packaging.Mutation,
+    employee.Mutation,
     graphene.ObjectType,
 ):
     token_auth = graphql_jwt.ObtainJSONWebToken.Field()

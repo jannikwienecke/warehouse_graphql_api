@@ -105,7 +105,7 @@ class DeletePackaging(graphene.Mutation):
         except:
             raise GraphQLError(f"'Packaging' mit ID {id} Nicht vorhanden")
 
-        return {'data': {'msg': 'Erfolgreich gelöscht'}}
+        return id
 
 
 

@@ -17,3 +17,8 @@ class Packaging(models.Model):
     width = models.IntegerField()
     length = models.IntegerField()
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+
+class Employee(models.Model):
+    name = models.CharField(max_length=50)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
