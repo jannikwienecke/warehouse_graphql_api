@@ -47,12 +47,10 @@ class CreatePackaging(graphene.Mutation):
         width = graphene.Int()
         length = graphene.Int()
 
-    @login_required
+    # @login_required
     def mutate(self, info, name, width, length):
 
         user = info.context.user or Non
-
-        
         package = Packaging(name=name, width=width, length=length, created_by=user)
         package.save()
 

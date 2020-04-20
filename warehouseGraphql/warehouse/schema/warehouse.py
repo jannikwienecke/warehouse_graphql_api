@@ -6,26 +6,26 @@ from graphql import GraphQLError
 from django.db.models import Q
 from ..graphql_jwt.decorators import login_required
 
-from ..models import Employee
+from ..models import Warehouse
 from ..utils import Filter
 from users.schema import UserType
 
 
-class EmployeeType(DjangoObjectType):
+class WarehouseType(DjangoObjectType):
     class Meta:
-        model = Employee
+        model = Warehouse
 
 class Query(graphene.ObjectType):
-    employees = graphene.List(
-        EmployeeType,
+    warehouses = graphene.List(
+        WarehouseType,
         search=graphene.String(description='FUZZY SEARCH'),
         id=graphene.Int(),
         name=graphene.String(),
         )
 
-    def resolve_employees(self, info, **kwargs):
+    def resolve_warehouses(self, info, **kwargs):
 
-        queryset = Employee.objects.all()
+        queryset = Warehouse.objects.all()
 
         if kwargs:
                 
@@ -35,7 +35,7 @@ class Query(graphene.ObjectType):
         return queryset
 
 
-class CreateEmployee(graphene.Mutation):
+class CreateWarehouse(graphene.Mutation):
     id = graphene.Int()
     name = graphene.String()
 
@@ -47,12 +47,12 @@ class CreateEmployee(graphene.Mutation):
 
         user = info.context.user or Non
         
-        employee = Employee(name=name, created_by=user)
-        employee.save()
+        warehouse = Warehouse(name=name, created_by=user)
+        warehouse.save()
 
-        return employee
+        return warehouse
 
-class UpdateEmployee(graphene.Mutation):
+class UpdateWarehouse(graphene.Mutation):
     id = graphene.Int()
     name = graphene.String()
     created_by = graphene.Field(UserType)
@@ -66,18 +66,18 @@ class UpdateEmployee(graphene.Mutation):
         user = info.context.user or Non
 
         try:
-            employee = Employee.objects.get(id=id)
+            warehouse = Warehouse.objects.get(id=id)
         except:
-            raise GraphQLError(f"'Employee' mit ID {id} Nicht vorhanden")
+            raise GraphQLError(f"'Warehouse' mit ID {id} Nicht vorhanden")
 
         for key, val in args.items():
-            setattr(employee, key, val)
+            setattr(warehouse, key, val)
 
-        employee.save()
+        warehouse.save()
 
-        return employee
+        return warehouse
 
-class DeleteEmployee(graphene.Mutation):
+class DeleteWarehouse(graphene.Mutation):
     id = graphene.Int()
     created_by = graphene.Field(UserType)
 
@@ -87,15 +87,15 @@ class DeleteEmployee(graphene.Mutation):
     def mutate(self, info, id=None, **args):
 
         try:
-            Employee.objects.get(id=id).delete()
+            Warehouse.objects.get(id=id).delete()
         except:
-            raise GraphQLError(f"'Employee' mit ID {id} Nicht vorhanden")
+            raise GraphQLError(f"'Warehouse' mit ID {id} Nicht vorhanden")
 
         return id
 
 
 
 class Mutation(graphene.ObjectType):
-    create_employee = CreateEmployee.Field()
-    update_employee = UpdateEmployee.Field()
-    delete_employee = DeleteEmployee.Field()
+    create_warehouse = CreateWarehouse.Field()
+    update_warehouse = UpdateWarehouse.Field()
+    delete_warehouse = DeleteWarehouse.Field()

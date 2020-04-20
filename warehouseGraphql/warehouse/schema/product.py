@@ -54,6 +54,7 @@ class CreateProduct(graphene.Mutation):
     three_in_row = graphene.Boolean()
     packaging = graphene.Field(PackagingType)
     created_by = graphene.Field(UserType)
+    created_at = graphene.DateTime()
 
     class Arguments:
         name = graphene.String()
@@ -90,6 +91,8 @@ class UpdateProduct(graphene.Mutation):
     notes_putaway = graphene.String()
     three_in_row = graphene.Boolean()
     packaging = graphene.Field(PackagingType)
+    created_by = graphene.Field(UserType)
+    created_at = graphene.DateTime()
 
     class Arguments:
         id = graphene.Int()
