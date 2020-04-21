@@ -39,8 +39,6 @@ class Filter:
             filter_by = filter_key
 
         elif '_id' in filter_key:
-            # related_model = filter_key[:-3]
-            # qs = qs.select_related(related_model)
             filter_by = filter_key
         else:
             filter_by = f'{filter_key}{self.filter_type}'
@@ -70,7 +68,16 @@ class FuzzyFilter():
     def _get_filter_list(self):
         filter_list = []
         for field in self.filter_fields:
-            filter_by = f'{field}__{self.filter_type}'
-            filter_list.append(Q(**{filter_by : self.filter_value}))
+            if '_id' in field:
+                filter_select_related = self._filter_related_model(field)
+                filter_list.append(filter_select_related)
+            else:
+                filter_by = f'{field}__{self.filter_type}'
+                filter_list.append(Q(**{filter_by : self.filter_value}))
 
         return filter_list
+
+    def _filter_related_model(self, field):
+        model = field[:-3]
+        filter_by = f'{model}__name__{self.filter_type}'
+        return Q(**{filter_by: self.filter_value})

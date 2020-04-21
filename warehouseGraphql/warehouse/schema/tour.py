@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import graphene
 from graphene_django import DjangoObjectType
 from graphql import GraphQLError
@@ -20,6 +22,7 @@ class TourType(DjangoObjectType):
 class Query(graphene.ObjectType):
     tours = graphene.List(
         TourType,
+        name=graphene.String(description="Date + Tournumber"),
         search=graphene.String(description='FUZZY SEARCH'),
         tour_number=graphene.Int(),
         employee_id=graphene.Int(),
@@ -30,10 +33,11 @@ class Query(graphene.ObjectType):
     def resolve_tours(self, info, **kwargs):
 
         queryset = Tour.objects.all()
+        # queryset = Tour.objects.select_related('employee', 'vehicle').all()
 
         if kwargs:
                 
-            fuzzy_search_fields = ['employee_id', 'vehicle_id', 'tour_number']
+            fuzzy_search_fields = ['tour_number','name', 'employee_id', 'vehicle_id']
 
             queryset = Filter(queryset, kwargs, None, fuzzy_search_fields)()
 
@@ -42,17 +46,18 @@ class Query(graphene.ObjectType):
 
 class CreateTour(graphene.Mutation):
     id = graphene.Int()
-    tour_number=graphene.Int(),
+    name = graphene.String()
+    tour_number = graphene.Int()
     employee = graphene.Field(EmployeeType)
     vehicle =graphene.Field(VehicleType)
 
     class Arguments:
-        tour_number = graphene.Int()
         employee_id = graphene.Int()
         vehicle_id=graphene.Int()
+        name = graphene.String()
+        tour_number = graphene.Int()
 
-    def mutate(self, info, employee_id, vehicle_id,
-        tour_number):
+    def mutate(self, info, employee_id, vehicle_id, name=None, tour_number=None):
         
 
         employee = Employee.objects.filter(id=employee_id).first()
@@ -65,10 +70,18 @@ class CreateTour(graphene.Mutation):
 
         user = info.context.user or None
 
+        today = datetime.now().date()
+        tours_today = Tour.objects.filter(created_at__year=today.year,
+            created_at__month=today.month, created_at__day=today.day)
+
+        number_tours_today = len(tours_today)
+
+        name = str(today).replace('-', '_') + "_tour_" +  str(number_tours_today + 1)
+
         tour = Tour(
             employee_id=employee_id,
-            vehicle_id=vehicle_id, tour_number=tour_number,
-             created_by=user)
+            vehicle_id=vehicle_id,created_by=user,
+            tour_number=number_tours_today+1, name=name)
 
         tour.save()
 
@@ -122,9 +135,13 @@ class DeleteTour(graphene.Mutation):
     def mutate(self, info, id=None, **args):
 
         try:
+            print("ID = ", id)
+            print('type', type(id))
+            print(Tour.objects.all().values())
             Tour.objects.get(id=id).delete()
-        except:
-            raise GraphQLError(f"'Produkt' mit ID {id} Nicht vorhanden")
+        except Exception as e:
+            print("ERROR = ", e)
+            raise GraphQLError(f"'Tour' mit ID {id} Nicht vorhanden")
 
         return id
 
