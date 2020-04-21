@@ -4,7 +4,7 @@ import graphql_jwt
 import users.schema
 from warehouse.schema import (
     product, packaging, employee, warehouse, compartment,
-    customer, symbuilding, symfactory, row
+    customer, symbuilding, symfactory, row, vehicle
 )
 
 # class Query(product.Query,  employee.Query, users.schema.Query, graphene.ObjectType):
@@ -14,6 +14,7 @@ class Query(
     product.Query, customer.Query, symfactory.Query, row.Query,
     symbuilding.Query, warehouse.Query, compartment.Query,
     packaging.Query, employee.Query, users.schema.Query,
+    vehicle.Query,
     graphene.ObjectType):
     pass
 
@@ -22,6 +23,7 @@ class Mutation(
     product.Mutation,
     packaging.Mutation,
     employee.Mutation,
+    vehicle.Mutation,
     customer.Mutation,
     symfactory.Mutation,
     symbuilding.Mutation,

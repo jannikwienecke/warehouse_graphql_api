@@ -23,6 +23,11 @@ class Employee(models.Model):
     name = models.CharField(max_length=50)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
+class Vehicle(models.Model):
+    name = models.CharField(max_length=50)
+    width = models.IntegerField()
+    length = models.IntegerField()
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
 class Customer(models.Model):
     customer_id = models.CharField(max_length=6)
