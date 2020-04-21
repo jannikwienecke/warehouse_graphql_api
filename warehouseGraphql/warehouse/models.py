@@ -68,3 +68,11 @@ class Row(models.Model):
     compartment = models.ForeignKey('warehouse.Compartment', on_delete=models.CASCADE)
     product = models.ForeignKey('warehouse.Product', blank=True, null=True, on_delete=models.CASCADE)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+class Tour(models.Model):
+    tour_number = models.IntegerField()
+    employee = models.ForeignKey('warehouse.Employee', on_delete=models.CASCADE)
+    vehicle = models.ForeignKey('warehouse.Vehicle', on_delete=models.CASCADE)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+
