@@ -71,6 +71,7 @@ class Row(models.Model):
 
 class Tour(models.Model):
     name = models.CharField(max_length=50)
+    is_open = models.BooleanField(default=True)
     tour_number = models.IntegerField()
     employee = models.ForeignKey('warehouse.Employee', on_delete=models.CASCADE)
     vehicle = models.ForeignKey('warehouse.Vehicle', on_delete=models.CASCADE)
@@ -85,6 +86,7 @@ class Withdrawal(models.Model):
     customer = models.ForeignKey('warehouse.Customer', on_delete=models.CASCADE)
     row = models.ForeignKey('warehouse.Row', on_delete=models.CASCADE)
     notes = models.TextField()
+    is_open = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 

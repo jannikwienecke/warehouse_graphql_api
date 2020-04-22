@@ -25,6 +25,7 @@ class WithdrawalType(DjangoObjectType):
 class Query(graphene.ObjectType):
     withdrawals = graphene.List(
         WithdrawalType,
+        id = graphene.Int(),
         name=graphene.String(description="Date + Number Withdrawal of this day"),
         search=graphene.String(description='FUZZY SEARCH'),
         employee_id=graphene.Int(),
@@ -32,6 +33,7 @@ class Query(graphene.ObjectType):
         product_id=graphene.Int(),
         tour_id=graphene.Int(),
         row_id=graphene.Int(),
+        is_open=graphene.Boolean(),
         notes=graphene.String(),
         )
 
@@ -59,6 +61,7 @@ class CreateWithdrawal(graphene.Mutation):
     row =graphene.Field(RowType)
     tour =graphene.Field(TourType)
     notes=graphene.String()
+    is_open=graphene.Boolean()
     created_at = graphene.DateTime()
 
     class Arguments:
@@ -69,10 +72,11 @@ class CreateWithdrawal(graphene.Mutation):
         product_id=graphene.Int()
         tour_id=graphene.Int()
         row_id=graphene.Int()
+        is_open=graphene.Boolean()
         notes=graphene.String()
 
     def mutate(self, info, employee_id, customer_id,
-        product_id, tour_id, row_id, notes='', name=''):
+        product_id, tour_id, row_id, notes='', name='', is_open=True ):
         
         row = Row.objects.filter(id=row_id).first()
         if not row:
@@ -98,7 +102,8 @@ class CreateWithdrawal(graphene.Mutation):
 
         today = datetime.now().date()
         withdrawal_today = Withdrawal.objects.filter(created_at__year=today.year,
-            created_at__month=today.month, created_at__day=today.day)
+            created_at__month=today.month, created_at__day=today.day,
+            )
 
         number_withdrawal_today = len(withdrawal_today) + 1
 
@@ -107,7 +112,7 @@ class CreateWithdrawal(graphene.Mutation):
         withdrawal = Withdrawal(
             employee_id=employee_id, product_id=product_id, tour_id=tour_id,
             customer_id=customer_id, row_id=row_id, created_by=user, notes=notes,
-            name=name)
+            name=name, is_open=is_open)
 
         withdrawal.save()
 
@@ -122,6 +127,7 @@ class UpdateWithdrawal(graphene.Mutation):
     row =graphene.Field(RowType)
     tour =graphene.Field(TourType)
     notes=graphene.String()
+    is_open=graphene.Boolean()
     created_at = graphene.DateTime()
     
     class Arguments:
@@ -132,6 +138,7 @@ class UpdateWithdrawal(graphene.Mutation):
         product_id=graphene.Int()
         tour_id=graphene.Int()
         row_id=graphene.Int()
+        is_open=graphene.Boolean()
         notes=graphene.String()
 
     def mutate(self, info, id=None, **kwargs):
@@ -187,10 +194,15 @@ class DeleteWithdrawal(graphene.Mutation):
 
     def mutate(self, info, id=None, **args):
 
+        print(Withdrawal.objects.all().values())
         try:
-            Withdrawal.objects.get(id=id).delete()
-        except:
-            raise GraphQLError(f"'Produkt' mit ID {id} Nicht vorhanden")
+            withdrawal = Withdrawal.objects.get(id=id)
+            print(withdrawal)
+            withdrawal.delete()
+
+        except Exception as e:
+            print('error', e)
+            raise GraphQLError(f"'Produkt' mit ID {id} Nicht vorhanden", e)
 
         return id
 

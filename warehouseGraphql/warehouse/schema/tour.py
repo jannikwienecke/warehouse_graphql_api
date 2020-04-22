@@ -22,7 +22,9 @@ class TourType(DjangoObjectType):
 class Query(graphene.ObjectType):
     tours = graphene.List(
         TourType,
+        id = graphene.Int(),
         name=graphene.String(description="Date + Tournumber"),
+        is_open=graphene.Boolean(),
         search=graphene.String(description='FUZZY SEARCH'),
         tour_number=graphene.Int(),
         employee_id=graphene.Int(),
@@ -47,17 +49,21 @@ class Query(graphene.ObjectType):
 class CreateTour(graphene.Mutation):
     id = graphene.Int()
     name = graphene.String()
+    is_open=graphene.Boolean()
     tour_number = graphene.Int()
     employee = graphene.Field(EmployeeType)
     vehicle =graphene.Field(VehicleType)
 
     class Arguments:
+        id = graphene.Int()
         employee_id = graphene.Int()
         vehicle_id=graphene.Int()
         name = graphene.String()
         tour_number = graphene.Int()
+        is_open=graphene.Boolean()
 
-    def mutate(self, info, employee_id, vehicle_id, name=None, tour_number=None):
+    def mutate(self, info, employee_id, vehicle_id, name=None, tour_number=None, 
+        is_open=True):
         
 
         employee = Employee.objects.filter(id=employee_id).first()
@@ -81,7 +87,9 @@ class CreateTour(graphene.Mutation):
         tour = Tour(
             employee_id=employee_id,
             vehicle_id=vehicle_id,created_by=user,
-            tour_number=number_tours_today+1, name=name)
+            tour_number=number_tours_today+1, name=name,
+            is_open=is_open
+            )
 
         tour.save()
 
@@ -92,12 +100,16 @@ class UpdateTour(graphene.Mutation):
     employee = graphene.Field(EmployeeType)
     vehicle=graphene.Field(VehicleType)
     tour_number = graphene.Int()
+    is_open=graphene.Boolean()
+    name = graphene.String()
 
     class Arguments:
         id = graphene.Int()
         employee_id = graphene.Int()
         vehicle_id=graphene.Int()
         tour_number = graphene.Int()
+        is_open=graphene.Boolean()
+        name = graphene.String()
 
     def mutate(self, info, id=None, **kwargs):
 
@@ -135,9 +147,6 @@ class DeleteTour(graphene.Mutation):
     def mutate(self, info, id=None, **args):
 
         try:
-            print("ID = ", id)
-            print('type', type(id))
-            print(Tour.objects.all().values())
             Tour.objects.get(id=id).delete()
         except Exception as e:
             print("ERROR = ", e)
