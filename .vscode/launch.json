@@ -8,7 +8,7 @@
       "name": "Python: Django",
       "type": "python",
       "request": "launch",
-      "program": "${workspaceFolder}\\warehouseGraphql\\manage.py",
+      "program": "${workspaceFolder}/warehouseGraphql/manage.py",
       "args": ["runserver", "--noreload"],
       "django": true
     }
