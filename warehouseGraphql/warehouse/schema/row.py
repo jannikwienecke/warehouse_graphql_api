@@ -1,7 +1,6 @@
 import graphene
 from graphene_django import DjangoObjectType
 from graphql import GraphQLError
-from django.db.models import Q
 from ..graphql_jwt.decorators import login_required
 
 from ..models import Row, Compartment, Product, Warehouse
@@ -9,7 +8,6 @@ from .compartment import CompartmentType
 from .warehouse import WarehouseType
 from .product import ProductType
 
-from users.schema import UserType
 
 from ..utils import Filter
 
@@ -17,6 +15,7 @@ from ..utils import Filter
 class RowType(DjangoObjectType):
     class Meta:
         model = Row
+
 
 class Query(graphene.ObjectType):
     rows = graphene.List(
@@ -26,10 +25,10 @@ class Query(graphene.ObjectType):
         compartment_id=graphene.Int(),
         product_id=graphene.Int(),
         warehouse_id=graphene.Int(),
-        number_stock_positions = graphene.Int(),
-        stock= graphene.Int(),
-        stock_positions= graphene.Int(),
-        )
+        total_stock_positions=graphene.Int(),
+        stock=graphene.Int(),
+        current_stock_positions=graphene.Int(),
+    )
 
     @login_required
     def resolve_rows(self, info, **kwargs):
@@ -37,7 +36,7 @@ class Query(graphene.ObjectType):
         queryset = Row.objects.all()
 
         if kwargs:
-                
+
             fuzzy_search_fields = ['name']
 
             queryset = Filter(queryset, kwargs, None, fuzzy_search_fields)()
@@ -48,31 +47,31 @@ class Query(graphene.ObjectType):
 class CreateRow(graphene.Mutation):
     id = graphene.Int()
     name = graphene.String()
-    number_stock_positions = graphene.Int()
+    total_stock_positions = graphene.Int()
     stock = graphene.Int()
-    stock_positions = graphene.Int()
+    current_stock_positions = graphene.Int()
     compartment = graphene.Field(CompartmentType)
-    product=graphene.Field(ProductType)
-    warehouse=graphene.Field(WarehouseType)
+    product = graphene.Field(ProductType)
+    warehouse = graphene.Field(WarehouseType)
 
     class Arguments:
         name = graphene.String()
-        number_stock_positions = graphene.Int()
+        total_stock_positions = graphene.Int()
         stock = graphene.Int()
-        stock_positions = graphene.Int()
+        current_stock_positions = graphene.Int()
         compartment_id = graphene.Int()
-        product_id=graphene.Int()
-        warehouse_id=graphene.Int()
+        product_id = graphene.Int()
+        warehouse_id = graphene.Int()
 
     def mutate(self, info, name, compartment_id, warehouse_id,
-        number_stock_positions, stock=0, stock_positions=0, product_id=None):
-        
+               total_stock_positions, current_stock_positions=0,
+               product_id=None, stock=0):
 
         compartment = Compartment.objects.filter(id=compartment_id).first()
         if not compartment:
             raise GraphQLError("Ungültige Abteilungs ID")
 
-        product =Product.objects.filter(id=product_id).first()
+        product = Product.objects.filter(id=product_id).first()
         if product_id and not product:
             raise GraphQLError("Ungültige Produkt ID")
 
@@ -83,7 +82,7 @@ class CreateRow(graphene.Mutation):
         user = info.context.user or None
 
         row = Row(
-            name=name, number_stock_positions=number_stock_positions,
+            name=name, total_stock_positions=total_stock_positions,
             compartment_id=compartment_id, product_id=product_id,
             warehouse_id=warehouse_id, created_by=user)
 
@@ -91,25 +90,26 @@ class CreateRow(graphene.Mutation):
 
         return row
 
+
 class UpdateRow(graphene.Mutation):
     id = graphene.Int()
     name = graphene.String()
-    number_stock_positions = graphene.Int()
+    total_stock_positions = graphene.Int()
     stock = graphene.Int()
-    stock_positions = graphene.Int()
+    current_stock_positions = graphene.Int()
     compartment = graphene.Field(CompartmentType)
-    product=graphene.Field(ProductType)
-    warehouse=graphene.Field(WarehouseType)
+    product = graphene.Field(ProductType)
+    warehouse = graphene.Field(WarehouseType)
 
     class Arguments:
         id = graphene.Int()
         name = graphene.String()
-        number_stock_positions = graphene.Int()
+        total_stock_positions = graphene.Int()
         stock = graphene.Int()
-        stock_positions = graphene.Int()
+        current_stock_positions = graphene.Int()
         compartment_id = graphene.Int()
-        product_id=graphene.Int()
-        warehouse_id=graphene.Int()
+        product_id = graphene.Int()
+        warehouse_id = graphene.Int()
 
     def mutate(self, info, id=None, **kwargs):
 
@@ -118,22 +118,24 @@ class UpdateRow(graphene.Mutation):
         #     raise GraphQLError("ID Fehlt")
 
         if 'compartment_id' in kwargs:
-                
-            compartment = Compartment.objects.filter(id=kwargs['compartment_id']).first()
+
+            compartment = Compartment.objects.filter(
+                id=kwargs['compartment_id']).first()
             if kwargs['compartment_id'] and not compartment:
                 raise GraphQLError("Ungültige Abteilungs ID")
 
         if 'product_id' in kwargs:
-            product =Product.objects.filter(id=kwargs['product_id']).first()
+            product = Product.objects.filter(id=kwargs['product_id']).first()
             if kwargs['product_id'] and not product:
                 raise GraphQLError("Ungültige Produkt ID")
-        
+
         if 'warehouse_id' in kwargs:
-                
-            warehouse = Warehouse.objects.filter(id=kwargs['warehouse_id']).first()
+
+            warehouse = Warehouse.objects.filter(
+                id=kwargs['warehouse_id']).first()
             if kwargs['warehouse_id'] and not warehouse:
                 raise GraphQLError("Ungültige Lager ID")
-        
+
         try:
             row = Row.objects.get(id=id)
         except:
@@ -151,7 +153,7 @@ class DeleteRow(graphene.Mutation):
     id = graphene.Int()
 
     class Arguments:
-        id =graphene.Int()
+        id = graphene.Int()
 
     def mutate(self, info, id=None, **args):
 
@@ -161,7 +163,6 @@ class DeleteRow(graphene.Mutation):
             raise GraphQLError(f"'Produkt' mit ID {id} Nicht vorhanden")
 
         return id
-
 
 
 class Mutation(graphene.ObjectType):

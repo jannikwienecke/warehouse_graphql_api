@@ -29,7 +29,7 @@ CORS_ORIGIN_ALLOW_ALL = DEBUG
 ALLOWED_HOSTS = [
     '*',
     'localhost',
-     'localhost:8000',
+    'localhost:8000',
     '127.0.0.1:9000',
     'localhost:3000',
     'http://localhost:3000',
@@ -41,7 +41,7 @@ CORS_ORIGIN_WHITELIST = [
     'https://localhost:3000',
     'http://127.0.0.1:3000',
     'https://127.0.0.1:3000',
-    ]
+]
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -66,7 +66,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'graphql_jwt.middleware.JSONWebTokenMiddleware',
+    # 'graphql_jwt.middleware.JSONWebTokenMiddleware',
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -98,23 +98,23 @@ WSGI_APPLICATION = 'warehouseGraphql.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'postgres',
-#         'USER': 'postgres',
-#         'PASSWORD': 'gehmalwiederpumpen',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'warehouse',
+        'USER': 'postgres',
+        'PASSWORD': 'admin',
+        'HOST': 'localhost',
+        'PORT': '',
+    }
+}
 
 
 # Password validation
@@ -158,9 +158,9 @@ STATIC_URL = '/static/'
 
 GRAPHENE = {
     'SCHEMA': 'warehouseGraphql.schema.schema',
-    #     'MIDDLEWARE': [
-    #     'graphql_jwt.middleware.JSONWebTokenMiddleware',
-    # ],
+    'MIDDLEWARE': [
+        'graphql_jwt.middleware.JSONWebTokenMiddleware',
+    ],
 }
 
 # MIDDLEWARE_CLASSES = (

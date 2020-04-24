@@ -1,4 +1,6 @@
 {
-    "python.pythonPath": "C:\\Users\\wiene\\Anaconda3\\envs\\env_warehouse_api\\python.exe",
-    "python.formatting.provider": "autopep8"
+    "python.pythonPath": "/home/wienecke/coding/warehouse_graphql_api/warehouseGraphql/env_/bin/python3",
+    "python.formatting.provider": "autopep8",
+    "python.linting.flake8Enabled": true,
+    "python.linting.enabled": true
 }

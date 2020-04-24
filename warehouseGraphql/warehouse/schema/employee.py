@@ -3,7 +3,6 @@ import graphene
 from graphene_django import DjangoObjectType
 from graphql import GraphQLError
 
-from django.db.models import Q
 from ..graphql_jwt.decorators import login_required
 
 from ..models import Employee
@@ -15,23 +14,24 @@ class EmployeeType(DjangoObjectType):
     class Meta:
         model = Employee
 
+
 class Query(graphene.ObjectType):
     employees = graphene.List(
         EmployeeType,
         search=graphene.String(description='FUZZY SEARCH'),
         id=graphene.Int(),
         name=graphene.String(),
-        )
+    )
 
     def resolve_employees(self, info, **kwargs):
 
         queryset = Employee.objects.all()
 
         if kwargs:
-                
+
             fuzzy_search_fields = ['name']
             queryset = Filter(queryset, kwargs, None, fuzzy_search_fields)()
-                    
+
         return queryset
 
 
@@ -45,25 +45,24 @@ class CreateEmployee(graphene.Mutation):
     @login_required
     def mutate(self, info, name):
 
-        user = info.context.user or Non
-        
+        user = info.context.user or None
+
         employee = Employee(name=name, created_by=user)
         employee.save()
 
         return employee
 
+
 class UpdateEmployee(graphene.Mutation):
     id = graphene.Int()
     name = graphene.String()
     created_by = graphene.Field(UserType)
-    
+
     class Arguments:
         id = graphene.Int()
         name = graphene.String()
 
     def mutate(self, info, id=None, **args):
-
-        user = info.context.user or Non
 
         try:
             employee = Employee.objects.get(id=id)
@@ -77,12 +76,13 @@ class UpdateEmployee(graphene.Mutation):
 
         return employee
 
+
 class DeleteEmployee(graphene.Mutation):
     id = graphene.Int()
     created_by = graphene.Field(UserType)
 
     class Arguments:
-        id =graphene.Int()
+        id = graphene.Int()
 
     def mutate(self, info, id=None, **args):
 
@@ -92,7 +92,6 @@ class DeleteEmployee(graphene.Mutation):
             raise GraphQLError(f"'Employee' mit ID {id} Nicht vorhanden")
 
         return id
-
 
 
 class Mutation(graphene.ObjectType):

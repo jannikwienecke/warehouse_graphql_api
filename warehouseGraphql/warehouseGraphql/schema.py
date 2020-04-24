@@ -5,19 +5,18 @@ import users.schema
 from warehouse.schema import (
     product, packaging, employee, warehouse, compartment,
     customer, symbuilding, symfactory, row, vehicle,
-    tour, withdrawal,
+    tour, withdrawal, null
 )
 
-# class Query(product.Query,  employee.Query, users.schema.Query, graphene.ObjectType):
-#     pass
 
 class Query(
-    product.Query, customer.Query, symfactory.Query, row.Query,
-    symbuilding.Query, warehouse.Query, compartment.Query,
-    packaging.Query, employee.Query, users.schema.Query,
-    vehicle.Query, tour.Query, withdrawal.Query,
-    graphene.ObjectType):
+        product.Query, customer.Query, symfactory.Query, row.Query,
+        symbuilding.Query, warehouse.Query, compartment.Query,
+        packaging.Query, employee.Query, users.schema.Query,
+        vehicle.Query, tour.Query, withdrawal.Query, null.Query,
+        graphene.ObjectType):
     pass
+
 
 class Mutation(
     users.schema.Mutation,
@@ -33,6 +32,7 @@ class Mutation(
     row.Mutation,
     tour.Mutation,
     withdrawal.Mutation,
+    null.Mutation,
     graphene.ObjectType,
 ):
     token_auth = graphql_jwt.ObtainJSONWebToken.Field()

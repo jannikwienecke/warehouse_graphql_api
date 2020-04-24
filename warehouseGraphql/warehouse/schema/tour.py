@@ -19,17 +19,18 @@ class TourType(DjangoObjectType):
     class Meta:
         model = Tour
 
+
 class Query(graphene.ObjectType):
     tours = graphene.List(
         TourType,
-        id = graphene.Int(),
+        id=graphene.Int(),
         name=graphene.String(description="Date + Tournumber"),
         is_open=graphene.Boolean(),
         search=graphene.String(description='FUZZY SEARCH'),
         tour_number=graphene.Int(),
         employee_id=graphene.Int(),
         vehicle_id=graphene.Int(),
-        )
+    )
 
     @login_required
     def resolve_tours(self, info, **kwargs):
@@ -38,8 +39,9 @@ class Query(graphene.ObjectType):
         # queryset = Tour.objects.select_related('employee', 'vehicle').all()
 
         if kwargs:
-                
-            fuzzy_search_fields = ['tour_number','name', 'employee_id', 'vehicle_id']
+
+            fuzzy_search_fields = ['tour_number',
+                                   'name', 'employee_id', 'vehicle_id']
 
             queryset = Filter(queryset, kwargs, None, fuzzy_search_fields)()
 
@@ -49,22 +51,21 @@ class Query(graphene.ObjectType):
 class CreateTour(graphene.Mutation):
     id = graphene.Int()
     name = graphene.String()
-    is_open=graphene.Boolean()
+    is_open = graphene.Boolean()
     tour_number = graphene.Int()
     employee = graphene.Field(EmployeeType)
-    vehicle =graphene.Field(VehicleType)
+    vehicle = graphene.Field(VehicleType)
 
     class Arguments:
         id = graphene.Int()
         employee_id = graphene.Int()
-        vehicle_id=graphene.Int()
+        vehicle_id = graphene.Int()
         name = graphene.String()
         tour_number = graphene.Int()
-        is_open=graphene.Boolean()
+        is_open = graphene.Boolean()
 
-    def mutate(self, info, employee_id, vehicle_id, name=None, tour_number=None, 
-        is_open=True):
-        
+    def mutate(self, info, employee_id, vehicle_id, name=None, tour_number=None,
+               is_open=True):
 
         employee = Employee.objects.filter(id=employee_id).first()
         if not employee:
@@ -78,59 +79,64 @@ class CreateTour(graphene.Mutation):
 
         today = datetime.now().date()
         tours_today = Tour.objects.filter(created_at__year=today.year,
-            created_at__month=today.month, created_at__day=today.day)
+                                          created_at__month=today.month, created_at__day=today.day)
 
         number_tours_today = len(tours_today)
 
-        name = str(today).replace('-', '_') + "_tour_" +  str(number_tours_today + 1)
+        name = str(today).replace('-', '_') + \
+            "_tour_" + str(number_tours_today + 1)
 
         tour = Tour(
             employee_id=employee_id,
-            vehicle_id=vehicle_id,created_by=user,
+            vehicle_id=vehicle_id, created_by=user,
             tour_number=number_tours_today+1, name=name,
             is_open=is_open
-            )
+        )
 
         tour.save()
 
         return tour
 
+
 class UpdateTour(graphene.Mutation):
     id = graphene.Int()
     employee = graphene.Field(EmployeeType)
-    vehicle=graphene.Field(VehicleType)
+    vehicle = graphene.Field(VehicleType)
     tour_number = graphene.Int()
-    is_open=graphene.Boolean()
+    is_open = graphene.Boolean()
     name = graphene.String()
 
     class Arguments:
         id = graphene.Int()
         employee_id = graphene.Int()
-        vehicle_id=graphene.Int()
+        vehicle_id = graphene.Int()
         tour_number = graphene.Int()
-        is_open=graphene.Boolean()
+        is_open = graphene.Boolean()
         name = graphene.String()
 
     def mutate(self, info, id=None, **kwargs):
 
         if 'employee_id' in kwargs:
-                
-            employee = Employee.objects.filter(id=kwargs['employee_id']).first()
+
+            employee = Employee.objects.filter(
+                id=kwargs['employee_id']).first()
             if kwargs['employee_id'] and not employee:
                 raise GraphQLError("Ungültige Abteilungs ID")
 
         if 'vehicle_id' in kwargs:
-                
+
             vehicle = Vehicle.objects.filter(id=kwargs['vehicle_id']).first()
             if kwargs['vehicle_id'] and not vehicle:
                 raise GraphQLError("Ungültige Lager ID")
-        
+
         try:
             tour = Tour.objects.get(id=id)
         except:
             raise GraphQLError(f"'Tour' mit ID {id} Nicht vorhanden")
 
         for key, val in kwargs.items():
+            if key == 'name':
+                continue
             setattr(tour, key, val)
 
         tour.save()
@@ -142,7 +148,7 @@ class DeleteTour(graphene.Mutation):
     id = graphene.Int()
 
     class Arguments:
-        id =graphene.Int()
+        id = graphene.Int()
 
     def mutate(self, info, id=None, **args):
 
@@ -153,7 +159,6 @@ class DeleteTour(graphene.Mutation):
             raise GraphQLError(f"'Tour' mit ID {id} Nicht vorhanden")
 
         return id
-
 
 
 class Mutation(graphene.ObjectType):
