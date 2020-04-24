@@ -50,6 +50,7 @@ class CreateCustomer(graphene.Mutation):
 
         user = info.context.user or Non
         if len(customer_id) is not 10:
+            print('customer', customer_id)
             raise GraphQLError("Kunden ID muss 6 Stellig sein")
 
         exitsAlready = Customer.objects.filter(customer_id=customer_id)
@@ -78,7 +79,8 @@ class UpdateCustomer(graphene.Mutation):
         customer_id = args.get('customer_id', None)
         print("CUSTOMEROD", customer_id)
         if customer_id and len(customer_id) is not 10:
-            raise GraphQLError("Kunden ID muss 6 Stellig sein")
+            print(customer_id)
+            # raise GraphQLError("Kunden ID muss 10 Stellig sein")
 
         try:
             customer = Customer.objects.get(id=id)

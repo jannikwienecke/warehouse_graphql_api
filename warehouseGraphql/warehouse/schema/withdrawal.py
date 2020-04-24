@@ -192,7 +192,7 @@ class UpdateWithdrawal(graphene.Mutation):
         except:
             raise GraphQLError(f"'Withdrawal' mit ID {id} Nicht vorhanden")
 
-        if 'row_id' in kwargs:
+        if 'row_id' in kwargs or 'quantity' in kwargs:
             _updateStockRow(id, kwargs)
 
         for key, val in kwargs.items():
@@ -218,11 +218,18 @@ def _updateStockRow(id, kwargs):
         setattr(row, 'stock', stock)
         row.save()
 
+    def _update_stock():
+        row = Row.objects.get(id=kwargs['row_id'])
+        quantity_prev = withdrawal['quantity']
+        quantity_diff = kwargs['quantity'] - quantity_prev
+        setattr(row, 'stock', getattr(row, 'stock') + quantity_diff)
+
     quantity = kwargs['quantity']
     withdrawal = Withdrawal.objects.filter(id=id).values()[0]
 
     if withdrawal['row_id'] is kwargs['row_id']:
-        return
+        if withdrawal['quantity'] is not quantity:
+            _update_stock()
 
     _removeQuantityFromOldRow()
     _addQuantityToNewRow()
