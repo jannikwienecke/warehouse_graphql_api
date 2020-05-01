@@ -5,12 +5,13 @@ from graphene_django import DjangoObjectType
 from graphql import GraphQLError
 from ..graphql_jwt.decorators import login_required
 
-from ..models import Withdrawal, Employee, Product, Customer, Row, Tour
-from .employee import EmployeeType
+from ..models import (Withdrawal, Product, Customer, Row, Tour, Symbuilding)
+# from .employee import EmployeeType
 from .customer import CustomerType
 from .product import ProductType
 from .row import RowType
 from .tour import TourType
+from .symbuilding import SymbuildingType
 
 from ..utils import Filter
 
@@ -28,8 +29,9 @@ class Query(graphene.ObjectType):
             description="Date + Number Withdrawal of this day"),
         search=graphene.String(description='FUZZY SEARCH'),
         row_id=graphene.Int(),
+        symbuilding_id=graphene.Int(),
         quantity=graphene.Int(),
-        employee_id=graphene.Int(),
+        # employee_id=graphene.Int(),
         customer_id=graphene.Int(),
         product_id=graphene.Int(),
         tour_id=graphene.Int(),
@@ -45,7 +47,7 @@ class Query(graphene.ObjectType):
         if kwargs:
 
             fuzzy_search_fields = [
-                'employee_id', 'customer_id', 'product_id', 'tour_id',
+                'customer_id', 'product_id', 'tour_id',
                 'row_id', 'notes']
 
             queryset = Filter(queryset, kwargs, None, fuzzy_search_fields)()
@@ -57,10 +59,11 @@ class CreateWithdrawal(graphene.Mutation):
     id = graphene.Int()
     name = graphene.String()
     quantity = graphene.Int()
-    employee = graphene.Field(EmployeeType)
+    # employee = graphene.Field(EmployeeType)
     customer = graphene.Field(CustomerType)
     product = graphene.Field(ProductType)
     row = graphene.Field(RowType)
+    symbuilding = graphene.Field(SymbuildingType)
     tour = graphene.Field(TourType)
     notes = graphene.String()
     is_open = graphene.Boolean()
@@ -70,16 +73,25 @@ class CreateWithdrawal(graphene.Mutation):
         id = graphene.Int()
         name = graphene.String()
         quantity = graphene.Int()
-        employee_id = graphene.Int()
+        # employee_id = graphene.Int()
         customer_id = graphene.Int()
         product_id = graphene.Int()
         tour_id = graphene.Int()
         row_id = graphene.Int()
+        symbuilding_id = graphene.Int()
         is_open = graphene.Boolean()
         notes = graphene.String()
 
-    def mutate(self, info, employee_id, customer_id, quantity,
+    def mutate(self, info, customer_id, quantity, symbuilding_id,
                product_id, tour_id, row_id, notes='', name='', is_open=True):
+
+        print('---------------------------------------------------------------------')
+        print("CREATE WITHDRAWL", quantity,
+              customer_id, product_id, tour_id, row_id)
+
+        symbuilding = Symbuilding.objects.filter(id=symbuilding_id).first()
+        if not symbuilding:
+            raise GraphQLError("Ungültige Gebäude ID")
 
         row = Row.objects.filter(id=row_id).first()
         if not row:
@@ -93,9 +105,9 @@ class CreateWithdrawal(graphene.Mutation):
         if not product:
             raise GraphQLError("Ungültige Mitarbeiter ID")
 
-        employee = Employee.objects.filter(id=employee_id).first()
-        if not employee:
-            raise GraphQLError("Ungültige Mitarbeiter ID")
+        # employee = Employee.objects.filter(id=employee_id).first()
+        # if not employee:
+        #     raise GraphQLError("Ungültige Mitarbeiter ID")
 
         customer = Customer.objects.filter(id=customer_id).first()
         if not customer:
@@ -115,8 +127,9 @@ class CreateWithdrawal(graphene.Mutation):
             str(number_withdrawal_today)
 
         withdrawal = Withdrawal(
-            employee_id=employee_id, product_id=product_id, tour_id=tour_id,
+            product_id=product_id, tour_id=tour_id,
             customer_id=customer_id, row_id=row_id,
+            symbuilding_id=symbuilding_id,
             created_by=user, notes=notes, quantity=quantity,
             name=name, is_open=is_open)
 
@@ -129,10 +142,11 @@ class UpdateWithdrawal(graphene.Mutation):
     id = graphene.Int()
     name = graphene.String()
     quantity = graphene.Int()
-    employee = graphene.Field(EmployeeType)
+    # employee = graphene.Field(EmployeeType)
     customer = graphene.Field(CustomerType)
     product = graphene.Field(ProductType)
     row = graphene.Field(RowType)
+    symbuilding = graphene.Field(SymbuildingType)
     tour = graphene.Field(TourType)
     notes = graphene.String()
     is_open = graphene.Boolean()
@@ -142,11 +156,12 @@ class UpdateWithdrawal(graphene.Mutation):
         id = graphene.Int()
         name = graphene.String()
         quantity = graphene.Int()
-        employee_id = graphene.Int()
+        # employee_id = graphene.Int()
         customer_id = graphene.Int()
         product_id = graphene.Int()
         tour_id = graphene.Int()
         row_id = graphene.Int()
+        symbuilding_id = graphene.Int()
         is_open = graphene.Boolean()
         notes = graphene.String()
 
@@ -167,18 +182,25 @@ class UpdateWithdrawal(graphene.Mutation):
             if kwargs['tour_id'] and not tour:
                 raise GraphQLError("Ungültige Tour ID")
 
+        if 'symbuilding_id' in kwargs:
+
+            symbuilding = Symbuilding.objects.filter(
+                id=kwargs['symbuilding_id']).first()
+            if kwargs['symbuilding_id'] and not symbuilding:
+                raise GraphQLError("Ungültige symbuilding ID")
+
         if 'row_id' in kwargs:
 
             row = Row.objects.filter(id=kwargs['row_id']).first()
             if kwargs['row_id'] and not row:
                 raise GraphQLError("Ungültige Row ID")
 
-        if 'employee_id' in kwargs:
+        # if 'employee_id' in kwargs:
 
-            employee = Employee.objects.filter(
-                id=kwargs['employee_id']).first()
-            if kwargs['employee_id'] and not employee:
-                raise GraphQLError("Ungültige Mitarbeiter ID")
+        #     employee = Employee.objects.filter(
+        #         id=kwargs['employee_id']).first()
+        #     if kwargs['employee_id'] and not employee:
+        #         raise GraphQLError("Ungültige Mitarbeiter ID")
 
         if 'customer_id' in kwargs:
 

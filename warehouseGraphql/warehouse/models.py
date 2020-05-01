@@ -34,6 +34,7 @@ class Vehicle(models.Model):
     name = models.CharField(max_length=50)
     width = models.IntegerField()
     length = models.IntegerField()
+    length_loading = models.IntegerField()
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
@@ -110,12 +111,14 @@ class Tour(models.Model):
 class Withdrawal(models.Model):
     name = models.CharField(max_length=50)
     tour = models.ForeignKey('warehouse.Tour', on_delete=models.CASCADE)
-    employee = models.ForeignKey(
-        'warehouse.Employee', on_delete=models.CASCADE)
+    # employee = models.ForeignKey(
+    #     'warehouse.Employee', on_delete=models.CASCADE)
     product = models.ForeignKey('warehouse.Product', on_delete=models.CASCADE)
     customer = models.ForeignKey(
         'warehouse.Customer', on_delete=models.CASCADE)
     row = models.ForeignKey('warehouse.Row', on_delete=models.CASCADE)
+    symbuilding = models.ForeignKey(
+        'warehouse.Symbuilding', on_delete=models.CASCADE)
     notes = models.TextField()
     quantity = models.IntegerField()
     is_open = models.BooleanField(default=True)
