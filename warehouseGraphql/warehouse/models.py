@@ -10,6 +10,8 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     three_in_row = models.BooleanField()
     quantity_unit = models.IntegerField()
+    units_per_truck_space = models.IntegerField()
+    units_per_storage_space = models.IntegerField()
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     packaging = models.ForeignKey(

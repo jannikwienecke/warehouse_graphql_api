@@ -25,6 +25,8 @@ class Query(graphene.ObjectType):
         packaging_id=graphene.Int(),
         three_in_row=graphene.Boolean(),
         quantity_unit=graphene.Int(),
+        units_per_truck_space=graphene.Int(),
+        units_per_storage_space=graphene.Int(),
         id=graphene.Int(),
         notes_picking=graphene.String(),
         notes_putaway=graphene.String(),
@@ -53,6 +55,8 @@ class CreateProduct(graphene.Mutation):
     notes_putaway = graphene.String()
     three_in_row = graphene.Boolean()
     quantity_unit = graphene.Int()
+    units_per_truck_space = graphene.Int()
+    units_per_storage_space = graphene.Int()
     packaging = graphene.Field(PackagingType)
     created_by = graphene.Field(UserType)
     created_at = graphene.DateTime()
@@ -64,10 +68,14 @@ class CreateProduct(graphene.Mutation):
         notes_putaway = graphene.String()
         three_in_row = graphene.Boolean()
         quantity_unit = graphene.Int()
+        units_per_truck_space = graphene.Int()
+        units_per_storage_space = graphene.Int()
         packaging_id = graphene.Int()
 
     def mutate(self, info, name, product_number, three_in_row, packaging_id,
-               quantity_unit, notes_picking=None, notes_putaway=None):
+               quantity_unit, units_per_truck_space,
+               units_per_storage_space, notes_picking=None,
+               notes_putaway=None):
 
         packaging = Packaging.objects.filter(id=packaging_id).first()
         if not packaging:
@@ -77,7 +85,10 @@ class CreateProduct(graphene.Mutation):
 
         product = Product(
             name=name, product_number=product_number,
-            quantity_unit=quantity_unit, notes_picking=notes_picking,
+            quantity_unit=quantity_unit,
+            units_per_storage_space=units_per_storage_space,
+            units_per_truck_space=units_per_truck_space,
+            notes_picking=notes_picking,
             notes_putaway=notes_putaway, three_in_row=three_in_row,
             packaging_id=packaging_id, created_by=user)
 
@@ -94,6 +105,8 @@ class UpdateProduct(graphene.Mutation):
     notes_putaway = graphene.String()
     three_in_row = graphene.Boolean()
     quantity_unit = graphene.Int()
+    units_per_truck_space = graphene.Int()
+    units_per_storage_space = graphene.Int()
     packaging = graphene.Field(PackagingType)
     created_by = graphene.Field(UserType)
     created_at = graphene.DateTime()
@@ -107,6 +120,8 @@ class UpdateProduct(graphene.Mutation):
         three_in_row = graphene.Boolean()
         packaging_id = graphene.Int()
         quantity_unit = graphene.Int()
+        units_per_truck_space = graphene.Int()
+        units_per_storage_space = graphene.Int()
 
     def mutate(self, info, id=None, **kwargs):
         if 'packaging_id' in kwargs:

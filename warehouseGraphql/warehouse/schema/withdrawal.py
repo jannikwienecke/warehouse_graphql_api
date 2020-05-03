@@ -126,6 +126,8 @@ class CreateWithdrawal(graphene.Mutation):
         name = str(today).replace('-', '_') + "_auslagerung_" + \
             str(number_withdrawal_today)
 
+        _reduceStockRow(product_id, row_id, quantity)
+
         withdrawal = Withdrawal(
             product_id=product_id, tour_id=tour_id,
             customer_id=customer_id, row_id=row_id,
@@ -136,6 +138,37 @@ class CreateWithdrawal(graphene.Mutation):
         withdrawal.save()
 
         return withdrawal
+
+
+def _reduceStockRow(product_id, row_id, units):
+    print("Reduce....", units)
+
+    def _getStockAfterWithdrawal():
+        stock = getattr(row, 'stock')
+        stockAfterWithdrawal = stock - quantity
+        if stockAfterWithdrawal < 0:
+            msg = f'Nur {stock} Stk. auf Lager, aber {quantity} gefragt'
+            raise GraphQLError(msg)
+        return stockAfterWithdrawal
+
+    def _getRow():
+        row = Row.objects.filter(product_id=product_id, id=row_id)
+        if not row:
+            msg = f"Reihe mit Produkt ID {product_id}, Row Id {row_id} nicht vorhanden"
+            raise GraphQLError(msg)
+        return row[0]
+
+    def _getQuantityByUnits():
+        product = Product.objects.get(id=product_id)
+        return getattr(product, 'quantity_unit') * units
+
+    row = _getRow()
+    quantity = _getQuantityByUnits()
+    stockAfterWithdrawal = _getStockAfterWithdrawal()
+
+    setattr(row, 'stock', stockAfterWithdrawal)
+
+    row.save()
 
 
 class UpdateWithdrawal(graphene.Mutation):
